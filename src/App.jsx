@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchImages } from "./services/api";
 import { useThrottle, useDebounce } from "./hooks";
 import Gallery from "./components/Gallery/Gallery";
+import SkeletonImage from "./components/Gallery/SkeletonImage";
 
 function App() {
   const [searchVal, setSearchVal] = useState("");
@@ -12,7 +13,7 @@ function App() {
     useInfiniteQuery({
       queryKey: ["images", query],
       queryFn: fetchImages,
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
         if (lastPage.nextPage <= lastPage.totalPages) {
           return lastPage.nextPage;
         } else {
@@ -21,6 +22,7 @@ function App() {
       },
       enabled: !!query,
     });
+
   const images = useMemo(() => {
     return data?.pages.flatMap((page) => page.images);
   }, [data?.pages]);
@@ -70,9 +72,21 @@ function App() {
         className="input"
       />
       {error && <p>Error: {error.message}</p>}
-      <Gallery images={images} />
-      {isFetching && !isFetchingNextPage && <div>Loading...</div>}
-      {isFetchingNextPage && <div>Loading more...</div>}
+      <div className="gallery">
+        <Gallery images={images} />
+        {(isFetching || isFetchingNextPage) && (
+          <>
+            <SkeletonImage />
+            <SkeletonImage />
+            <SkeletonImage />
+            <SkeletonImage />
+            <SkeletonImage />
+            <SkeletonImage />
+            <SkeletonImage />
+            <SkeletonImage />
+          </>
+        )}
+      </div>
     </div>
   );
 }
